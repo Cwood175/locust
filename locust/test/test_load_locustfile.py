@@ -210,12 +210,16 @@ class TestLoadLocustfile(LocustTestCase):
             self.assertEqual("my_locust_file.py", options.locustfile)
 
     def test_locustfile_from_url(self):
-        locustfiles = get_locustfiles_from_args(
-            args=[
-                "-f",
-                "https://raw.githubusercontent.com/locustio/locust/master/examples/basic.py",
-            ]
-        )
+        with mock.patch("requests.get") as mocked_get:
+            with open(f"{os.getcwd()}/examples/basic.py", "rb") as fixture:
+                mocked_get.return_value.content = fixture.read()
+            mocked_get.return_value.raise_for_status.return_value = None
+            locustfiles = get_locustfiles_from_args(
+                args=[
+                    "-f",
+                    "https://example.com/basic.py",
+                ]
+            )
         self.assertEqual(len(locustfiles), 1)
         self.assertTrue(
             filecmp.cmp(
