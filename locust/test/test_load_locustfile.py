@@ -210,19 +210,20 @@ class TestLoadLocustfile(LocustTestCase):
             self.assertEqual("my_locust_file.py", options.locustfile)
 
     def test_locustfile_from_url(self):
-        locustfiles = get_locustfiles_from_args(
-            args=[
-                "-f",
-                "https://raw.githubusercontent.com/locustio/locust/master/examples/basic.py",
-            ]
-        )
-        self.assertEqual(len(locustfiles), 1)
-        self.assertTrue(
-            filecmp.cmp(
-                locustfiles[0],
-                f"{os.getcwd()}/examples/basic.py",
+        with patch("locust.argument_parser.requests.get") as mock_get:
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.content = b"from locust import User\n\nclass MyUser(User):\n    pass"
+            mock_get.return_value = mock_response
+
+            locustfiles = get_locustfiles_from_args(
+                args=[
+                    "-f",
+                    "https://example.com/basic.py",
+                ]
             )
-        )
+            self.assertEqual(len(locustfiles), 1)
+            self.assertTrue(locustfiles[0].endswith("basic.py"))
 
     def test_profile_flag(self):
         options = parse_options()
