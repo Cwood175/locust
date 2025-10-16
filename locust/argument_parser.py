@@ -120,14 +120,14 @@ class LocustTomlConfigParser(configargparse.TomlConfigParser):
         except Exception as e:
             raise configargparse.ConfigFileParserException(f"Couldn't parse TOML file: {e}")
 
-        sectionDataNotFound = True
+        section_data_not_found = True
 
         # convert to dict and filter based on section names
         result = OrderedDict()
         for section in self.sections:
             if data := configargparse.get_toml_section(config, section):
                 for key, value in data.items():
-                    sectionDataNotFound = False
+                    section_data_not_found = False
                     if isinstance(value, list):
                         result[key] = value
                     elif value is None:
@@ -135,12 +135,12 @@ class LocustTomlConfigParser(configargparse.TomlConfigParser):
                     else:
                         result[key] = str(value)
                 break
-        if sectionDataNotFound:
-            print( type(config).__name__ )
-            if data:= config:
+        if section_data_not_found:
+            print(type(config).__name__)
+            if data := config:
                 for key, value in config.items():
-                    print( key, value )
-                    print( type(value).__name__ )
+                    print(key, value)
+                    print(type(value).__name__)
                     if isinstance(value, list):
                         result[key] = value
                     elif isinstance(value, dict):
@@ -365,6 +365,11 @@ def parse_locustfile_option(args=None) -> tuple[argparse.Namespace, list[str]]:
 
 def get_locustfiles_locally(options):
     if options.locustfile == "-":
+        if not options.worker:
+            sys.stderr.write(
+                "locustfile was set to '-' (meaning to download from master) but --worker was not specified.\n"
+            )
+            sys.exit(1)
         locustfile_list = retrieve_locustfiles_from_master(options)
     else:
         locustfile_list = [f.strip() for f in options.locustfile.split(",")]
@@ -452,7 +457,7 @@ def json_user_config(string):
             if "user_class_name" not in config:
                 raise configargparse.ArgumentTypeError("The user config must specify a user_class_name")
 
-        return user_config
+        return json.dumps(user_config, ensure_ascii=False)
 
     except json.decoder.JSONDecodeError as e:
         raise configargparse.ArgumentTypeError(f"The --config-users argument must be a valid JSON string or file: {e}")
