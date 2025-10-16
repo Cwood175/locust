@@ -136,11 +136,8 @@ class LocustTomlConfigParser(configargparse.TomlConfigParser):
                         result[key] = str(value)
                 break
         if sectionDataNotFound:
-            print( type(config).__name__ )
-            if data:= config:
+            if data := config:
                 for key, value in config.items():
-                    print( key, value )
-                    print( type(value).__name__ )
                     if isinstance(value, list):
                         result[key] = value
                     elif isinstance(value, dict):
@@ -221,7 +218,7 @@ def get_empty_argument_parser(add_help=True, default_config_files=DEFAULT_CONFIG
         default_config_files=default_config_files,
         config_file_parser_class=configargparse.CompositeConfigParser(
             [
-                LocustTomlConfigParser(['tool.locust']),# ['tool.locust' ]
+                LocustTomlConfigParser(["tool.locust"]),
                 configargparse.DefaultConfigFileParser,
             ]
         ),
@@ -453,10 +450,8 @@ def json_user_config(string):
                 raise configargparse.ArgumentTypeError("The user config must specify a user_class_name")
 
         return user_config
-
     except json.decoder.JSONDecodeError as e:
         raise configargparse.ArgumentTypeError(f"The --config-users argument must be a valid JSON string or file: {e}")
-
     except FileNotFoundError as e:
         raise configargparse.ArgumentTypeError(str(e))
 

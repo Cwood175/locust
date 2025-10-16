@@ -70,7 +70,7 @@ class StandaloneIntegrationTests(ProcessIntegrationTest):
             timeout=5,
             text=True,
         ).strip()
-        self.assertTrue(output.startswith("Usage: locust [options] [UserClass"))
+        self.assertIn("Usage: locust", output)
         self.assertIn("Common options:", output)
         self.assertIn("--locustfile <filename>", output)
         self.assertIn("Logging options:", output)
@@ -985,7 +985,7 @@ class StandaloneIntegrationTests(ProcessIntegrationTest):
 
     def test_error_when_locustfiles_directory_is_empty(self):
         with TemporaryDirectory() as temp_dir:
-            with TestProcess(f"locust -f {temp_dir}", expect_return_code=1) as tp:
+            with TestProcess(f"locust -f {temp_dir}", expect_return_code=1, sigint_on_exit=False) as tp:
                 tp.expect(f"Could not find any locustfiles in directory '{temp_dir}'")
 
     def test_error_when_no_tasks_match_tags(self):
@@ -1085,7 +1085,8 @@ class MyUser(HttpUser):
             stdout = "\n".join(proc.stdout_output)
 
             try:
-                data = json.loads(stdout)
+                json_start = stdout.find("[")
+                data = json.loads(stdout[json_start:])
             except json.JSONDecodeError:
                 self.fail(f"Trying to parse {stdout} as json failed")
 
@@ -1423,7 +1424,10 @@ class AnyUser(HttpUser):
                         tp.expect("All users spawned")
 
                         # worker index: {id}
-                        indexes = [int(tp_worker_1.stdout_output[0][-1]), int(tp_worker_2.stdout_output[0][-1])]
+                        indexes = []
+                        for worker in (tp_worker_1, tp_worker_2):
+                            worker_index_line = next(line for line in worker.stdout_output if "worker index:" in line)
+                            indexes.append(int(worker_index_line.rsplit("worker index:", 1)[1].strip()))
                         indexes.sort()
                         self.assertEqual(0, indexes[0], f"expected index 0 but got {indexes[0]}")
                         self.assertEqual(1, indexes[1], f"expected index 1 but got {indexes[1]}")

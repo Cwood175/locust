@@ -124,6 +124,10 @@ class TestProcess:
             for idx, line in enumerate(new_lines):
                 if to_expect in line:
                     cursor += idx + 1
+                    if stream == "stdout":
+                        self._stdout_cursor = cursor
+                    else:
+                        self._stderr_cursor = cursor
                     return
             time.sleep(0.05)
 
