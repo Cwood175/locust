@@ -230,11 +230,8 @@ def get_empty_argument_parser(add_help=True, default_config_files=DEFAULT_CONFIG
         add_help=add_help,
         formatter_class=configargparse.RawDescriptionHelpFormatter,
         usage=configargparse.SUPPRESS,
-        description=textwrap.dedent(
-            """
-Usage: locust [options] [UserClass ...]
-        """
-        ),
+        description="Usage: locust [options] [UserClass ...]",
+
         epilog="""Examples:
 
     locust -f my_test.py -H https://www.example.com
