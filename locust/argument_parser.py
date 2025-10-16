@@ -136,11 +136,8 @@ class LocustTomlConfigParser(configargparse.TomlConfigParser):
                         result[key] = str(value)
                 break
         if sectionDataNotFound:
-            print( type(config).__name__ )
-            if data:= config:
+            if data := config:
                 for key, value in config.items():
-                    print( key, value )
-                    print( type(value).__name__ )
                     if isinstance(value, list):
                         result[key] = value
                     elif isinstance(value, dict):
@@ -231,9 +228,9 @@ def get_empty_argument_parser(add_help=True, default_config_files=DEFAULT_CONFIG
         formatter_class=configargparse.RawDescriptionHelpFormatter,
         usage=configargparse.SUPPRESS,
         description=textwrap.dedent(
-            """
+            """\
 Usage: locust [options] [UserClass ...]
-        """
+"""
         ),
         epilog="""Examples:
 
