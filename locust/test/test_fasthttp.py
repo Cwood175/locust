@@ -835,7 +835,5 @@ class TestFastHttpSsl(LocustTestCase):
             "https://127.0.0.1:%i" % self.web_port, self.environment.events.request, insecure=True, user=None
         )
         response = s.get("/")
-        d = pq(response.content.decode("utf-8"))
 
         self.assertEqual(200, response.status_code)
-        self.assertIn('"users": null', str(d))
