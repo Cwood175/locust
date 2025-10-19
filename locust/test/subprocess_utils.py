@@ -103,9 +103,9 @@ class TestProcess:
             self.proc.kill()
             self.proc.wait()
             self.on_fail(f"Process took more than {self.join_timeout} seconds to terminate.")
-
-        self.stdout_reader.join(timeout=self.join_timeout)
-        self.stderr_reader.join(timeout=self.join_timeout)
+        finally:
+            self.stdout_reader.join(timeout=self.join_timeout)
+            self.stderr_reader.join(timeout=self.join_timeout)
 
     # Check output logs from last found (stateful)
     def expect(self, to_expect, *, stream="stderr"):
@@ -124,6 +124,10 @@ class TestProcess:
             for idx, line in enumerate(new_lines):
                 if to_expect in line:
                     cursor += idx + 1
+                    if stream == "stdout":
+                        self._stdout_cursor = cursor
+                    else:
+                        self._stderr_cursor = cursor
                     return
             time.sleep(0.05)
 
