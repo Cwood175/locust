@@ -102,7 +102,7 @@ class TestProcess:
         except subprocess.TimeoutExpired:
             self.proc.kill()
             self.proc.wait()
-            self.on_fail(f"Process took more than {self.join_timeout} seconds to terminate.")
+            raise
 
         self.stdout_reader.join(timeout=self.join_timeout)
         self.stderr_reader.join(timeout=self.join_timeout)
