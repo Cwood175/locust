@@ -351,7 +351,7 @@ def main():
                 resource.setrlimit(resource.RLIMIT_NOFILE, limits)
         except BaseException:
             logger.warning(
-                f"""System open file limit '{soft_limit} is below minimum setting '{minimum_open_file_limit}'.
+                f"""System open file limit '{soft_limit}' is below minimum setting '{minimum_open_file_limit}'.
 It's not high enough for load testing, and the OS didn't allow locust to increase it by itself.
 See https://github.com/locustio/locust/wiki/Installation#increasing-maximum-number-of-open-files-limit for more info."""
             )
@@ -602,18 +602,26 @@ See https://github.com/locustio/locust/wiki/Installation#increasing-maximum-numb
         input_listener_greenlet = gevent.spawn(
             input_listener(
                 {
-                    "w": lambda: runner.start(runner.user_count + 1, 100)
-                    if runner.state != "spawning"
-                    else logging.warning("Already spawning users, can't spawn more right now"),
-                    "W": lambda: runner.start(runner.user_count + 10, 100)
-                    if runner.state != "spawning"
-                    else logging.warning("Already spawning users, can't spawn more right now"),
-                    "s": lambda: runner.start(max(0, runner.user_count - 1), 100)
-                    if runner.state != "spawning"
-                    else logging.warning("Spawning users, can't stop right now"),
-                    "S": lambda: runner.start(max(0, runner.user_count - 10), 100)
-                    if runner.state != "spawning"
-                    else logging.warning("Spawning users, can't stop right now"),
+                    "w": lambda: (
+                        runner.start(runner.user_count + 1, 100)
+                        if runner.state != "spawning"
+                        else logging.warning("Already spawning users, can't spawn more right now")
+                    ),
+                    "W": lambda: (
+                        runner.start(runner.user_count + 10, 100)
+                        if runner.state != "spawning"
+                        else logging.warning("Already spawning users, can't spawn more right now")
+                    ),
+                    "s": lambda: (
+                        runner.start(max(0, runner.user_count - 1), 100)
+                        if runner.state != "spawning"
+                        else logging.warning("Spawning users, can't stop right now")
+                    ),
+                    "S": lambda: (
+                        runner.start(max(0, runner.user_count - 10), 100)
+                        if runner.state != "spawning"
+                        else logging.warning("Spawning users, can't stop right now")
+                    ),
                     "\r": lambda: webbrowser.open_new_tab(url),
                     "\n": lambda: webbrowser.open_new_tab(url),
                 },

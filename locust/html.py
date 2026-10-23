@@ -22,10 +22,22 @@ def process_html_filename(options) -> None:
     for option_term, option_value in option_mapping.items():
         if option_value is not None:
             options.html_file = options.html_file.replace(option_term, str(int(option_value)))
+        else:
+            options.html_file = options.html_file.replace(option_term, "")
 
 
 def render_template_from(file, build_path=DEFAULT_BUILD_PATH, **kwargs):
-    env = JinjaEnvironment(loader=FileSystemLoader(build_path))
+    try:
+        env = JinjaEnvironment(loader=FileSystemLoader(build_path))
+    except TypeError:
+        # Handle missing directory
+        from importlib.resources import files
+
+        template_dir = files("locust").joinpath("webui", "dist")
+        if template_dir.is_dir():
+            env = JinjaEnvironment(loader=FileSystemLoader(template_dir))
+        else:
+            raise
     template = env.get_template(file)
     return template.render(**kwargs)
 

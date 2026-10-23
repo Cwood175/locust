@@ -10,7 +10,6 @@ from unittest import mock
 
 import gevent
 
-from . import changed_rlimit
 from .testcases import LocustTestCase
 from .util import temporary_file
 
@@ -135,10 +134,7 @@ class TestLoggingOptions(LocustTestCase):
                 timeout=10,
                 text=True,
             )
-        if not changed_rlimit:
-            self.assertTrue(output.strip().endswith("running my_task"))
-        else:
-            self.assertEqual("running my_task", output.strip())
+        self.assertTrue(output.strip().endswith("running my_task"))
 
     def test_log_to_file(self):
         with temporary_file(
@@ -238,3 +234,4 @@ class TestLoggingOptions(LocustTestCase):
             )
 
         self.assertIn("ERROR/locust.user.users: Invalid URL", output)
+        self.assertIn("500", output)
