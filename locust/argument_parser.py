@@ -181,6 +181,7 @@ def download_locustfile_from_url(url: str) -> str:
     """
     try:
         response = requests.get(url)
+        response.raise_for_status()
     except requests.exceptions.RequestException as e:
         sys.stderr.write(f"Failed to get locustfile from: {url}. Exception: {e}")
         sys.exit(1)

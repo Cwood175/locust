@@ -210,12 +210,29 @@ class TestLoadLocustfile(LocustTestCase):
             self.assertEqual("my_locust_file.py", options.locustfile)
 
     def test_locustfile_from_url(self):
-        locustfiles = get_locustfiles_from_args(
-            args=[
-                "-f",
-                "https://raw.githubusercontent.com/locustio/locust/master/examples/basic.py",
-            ]
+        import functools
+        import http.server
+        import threading
+
+        handler = functools.partial(
+            http.server.SimpleHTTPRequestHandler,
+            directory=f"{os.getcwd()}/examples",
         )
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            port = server.server_address[1]
+            locustfiles = get_locustfiles_from_args(
+                args=[
+                    "-f",
+                    f"http://127.0.0.1:{port}/basic.py",
+                ]
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
         self.assertEqual(len(locustfiles), 1)
         self.assertTrue(
             filecmp.cmp(
