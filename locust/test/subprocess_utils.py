@@ -90,8 +90,6 @@ class TestProcess:
             os.close(self.stdin_s)
 
         try:
-            if self.sigint_on_exit and not self._terminated:
-                self.terminate()
             proc_return_code = self.proc.wait(timeout=self.join_timeout)
 
             # Locust does not perform a graceful shutdown on Windows since we send SIGTERM
@@ -100,6 +98,8 @@ class TestProcess:
                     f"Process exited with return code {proc_return_code}. Expected {self.expect_return_code} ({proc_return_code} != {self.expect_return_code})"
                 )
         except subprocess.TimeoutExpired:
+            if self.sigint_on_exit and not self._terminated:
+                self.terminate()
             self.proc.kill()
             self.proc.wait()
             self.on_fail(f"Process took more than {self.join_timeout} seconds to terminate.")
